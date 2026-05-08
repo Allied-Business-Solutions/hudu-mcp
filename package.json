@@ -1,0 +1,16 @@
+{
+  "name": "hudu-mcp",
+  "version": "2.1.0",
+  "description": "MCP Server for the Hudu IT Documentation REST API",
+  "main": "stdio.js",
+  "type": "module",
+  "scripts": {
+    "start": "node stdio.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
