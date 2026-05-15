@@ -60,9 +60,11 @@ This server implements the [Model Context Protocol (MCP)](https://modelcontextpr
 
 ### 1. Clone and build
 
-```bash
-git clone https://github.com/Allied-Business-Solutions/hudu-mcp.git
-cd hudu-mcp
+Clone the repo into the standard install location and build:
+
+```powershell
+git clone https://github.com/Allied-Business-Solutions/hudu-mcp.git "$env:LOCALAPPDATA\Programs\HuduMCP"
+cd "$env:LOCALAPPDATA\Programs\HuduMCP"
 npm install
 npm run build
 ```
@@ -83,7 +85,7 @@ Add the `hudu` entry under `mcpServers`:
   "mcpServers": {
     "hudu": {
       "command": "node",
-      "args": ["C:/path/to/hudu-mcp/dist/index.js"],
+      "args": ["C:/Users/YOUR_USERNAME/AppData/Local/Programs/HuduMCP/dist/index.js"],
       "env": {
         "HUDU_API_KEY": "your_api_key_here",
         "HUDU_BASE_URL": "https://your-instance.huducloud.com/api/v1"
@@ -93,7 +95,7 @@ Add the `hudu` entry under `mcpServers`:
 }
 ```
 
-Replace the path, API key, and URL with your own values. Restart Claude Desktop.
+Replace `YOUR_USERNAME` with your Windows username, then fill in your API key and Hudu URL. Restart Claude Desktop.
 
 ### 3. Configure Claude Code
 
@@ -104,7 +106,7 @@ Add to `~/.claude/settings.json` (or `.claude/settings.json` in your project):
   "mcpServers": {
     "hudu": {
       "command": "node",
-      "args": ["/path/to/hudu-mcp/dist/index.js"],
+      "args": ["C:/Users/YOUR_USERNAME/AppData/Local/Programs/HuduMCP/dist/index.js"],
       "env": {
         "HUDU_API_KEY": "your_api_key_here",
         "HUDU_BASE_URL": "https://your-instance.huducloud.com/api/v1"
@@ -113,6 +115,8 @@ Add to `~/.claude/settings.json` (or `.claude/settings.json` in your project):
   }
 }
 ```
+
+Replace `YOUR_USERNAME` with your Windows username, then fill in your API key and Hudu URL.
 
 ---
 
@@ -148,7 +152,7 @@ Once connected, you can ask Claude things like:
 ## Troubleshooting
 
 **Tools don't appear in Claude**
-Verify the config file is valid JSON and the path to `dist/index.js` is correct. Restart Claude Desktop after any config change.
+Verify the config file is valid JSON and the path to `dist/index.js` is correct (e.g. `C:/Users/YOUR_USERNAME/AppData/Local/Programs/HuduMCP/dist/index.js`). Restart Claude Desktop after any config change.
 
 **`HUDU_API_KEY is required` error**
 The `env` block in your Claude config is missing or the key name is wrong. Check that it's exactly `HUDU_API_KEY`.
