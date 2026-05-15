@@ -8,7 +8,7 @@ Connect Claude AI to your [Hudu](https://www.hudu.com) IT documentation platform
 
 This server implements the [Model Context Protocol (MCP)](https://modelcontextprotocol.io), giving Claude secure, structured access to the Hudu REST API. It runs as a local stdio process that Claude Desktop or Claude Code launches on demand.
 
-### Available Tools (147 total)
+### Available Tools
 
 | Category | Tools |
 |----------|-------|
@@ -50,41 +50,24 @@ This server implements the [Model Context Protocol (MCP)](https://modelcontextpr
 
 ## Prerequisites
 
-- **Windows** (the installer is PowerShell-based; macOS/Linux users see [Manual Setup](#manual-setup))
-- **Node.js 18 or newer** — the installer will download it automatically if missing
-- **Claude Desktop** — download from [claude.ai](https://claude.ai/download)
+- **Node.js 18 or newer** — [nodejs.org](https://nodejs.org)
+- **Claude Desktop** or **Claude Code**
 - **A Hudu API key** — generate one at **Hudu Admin → Basic Information → API Keys**
 
 ---
 
-## Quick Install (Windows)
+## Installation
 
-Run this one-liner in PowerShell to download and install everything:
-
-```powershell
-powershell -ExecutionPolicy Bypass -c "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Allied-Business-Solutions/hudu-mcp/main/install.ps1' -OutFile '$env:TEMP\install-hudu-mcp.ps1'; & '$env:TEMP\install-hudu-mcp.ps1'"
-```
-
-The installer will:
-1. Check for / install Node.js
-2. Prompt for your Hudu base URL (e.g. `https://your-company.huducloud.com`)
-3. Prompt for your Hudu API key
-4. Install the server to `%LOCALAPPDATA%\Programs\HuduMCP`
-5. Wire it into Claude Desktop automatically
-
-**Restart Claude Desktop** after the installer finishes.
-
----
-
-## Manual Setup
-
-### 1. Clone the repo
+### 1. Clone and build
 
 ```bash
 git clone https://github.com/Allied-Business-Solutions/hudu-mcp.git
 cd hudu-mcp
 npm install
+npm run build
 ```
+
+This compiles the TypeScript source into `dist/`.
 
 ### 2. Configure Claude Desktop
 
@@ -100,7 +83,7 @@ Add the `hudu` entry under `mcpServers`:
   "mcpServers": {
     "hudu": {
       "command": "node",
-      "args": ["C:/path/to/hudu-mcp/stdio.js"],
+      "args": ["C:/path/to/hudu-mcp/dist/index.js"],
       "env": {
         "HUDU_API_KEY": "your_api_key_here",
         "HUDU_BASE_URL": "https://your-instance.huducloud.com/api/v1"
@@ -121,7 +104,7 @@ Add to `~/.claude/settings.json` (or `.claude/settings.json` in your project):
   "mcpServers": {
     "hudu": {
       "command": "node",
-      "args": ["/path/to/hudu-mcp/stdio.js"],
+      "args": ["/path/to/hudu-mcp/dist/index.js"],
       "env": {
         "HUDU_API_KEY": "your_api_key_here",
         "HUDU_BASE_URL": "https://your-instance.huducloud.com/api/v1"
@@ -133,13 +116,14 @@ Add to `~/.claude/settings.json` (or `.claude/settings.json` in your project):
 
 ---
 
-## Uninstall (Windows)
+## Environment Variables
 
-```powershell
-powershell -ExecutionPolicy Bypass -c "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Allied-Business-Solutions/hudu-mcp/main/uninstall.ps1' -OutFile '$env:TEMP\uninstall-hudu-mcp.ps1'; & '$env:TEMP\uninstall-hudu-mcp.ps1'"
-```
+| Variable | Description |
+|----------|-------------|
+| `HUDU_API_KEY` | Your Hudu API key (from Hudu Admin → Basic Information → API Keys) |
+| `HUDU_BASE_URL` | Your Hudu instance API base URL, e.g. `https://your-instance.huducloud.com/api/v1` |
 
-Or run `uninstall.ps1` from the cloned repo directly.
+See `.env.example` for a template.
 
 ---
 
@@ -149,11 +133,11 @@ Once connected, you can ask Claude things like:
 
 > "Search Hudu for any articles about VPN setup and summarize what we have"
 
-> "Find all assets for Contoso Corp and list their serial numbers"
+> "Find all assets for Acme Corp and list their serial numbers"
 
-> "Create a new article called 'Windows 11 Deployment Guide' under the Contoso Corp company with these steps: [paste steps]"
+> "Create a new article called 'Windows 11 Deployment Guide' under the Acme Corp company with these steps: [paste steps]"
 
-> "Look up the password entry for the Contoso firewall admin account"
+> "Look up the password entry for the Acme firewall admin account"
 
 > "What procedures do we have documented for onboarding new employees?"
 
@@ -164,7 +148,7 @@ Once connected, you can ask Claude things like:
 ## Troubleshooting
 
 **Tools don't appear in Claude**
-Verify the config file is valid JSON and the path to `stdio.js` is correct. Restart Claude Desktop after any config change.
+Verify the config file is valid JSON and the path to `dist/index.js` is correct. Restart Claude Desktop after any config change.
 
 **`HUDU_API_KEY is required` error**
 The `env` block in your Claude config is missing or the key name is wrong. Check that it's exactly `HUDU_API_KEY`.
@@ -180,15 +164,28 @@ Install Node.js 18+ from [nodejs.org](https://nodejs.org) and restart your termi
 
 ---
 
+## Development
+
+```bash
+npm run build    # compile TypeScript → dist/
+npm run dev      # watch mode (recompiles on save)
+npm start        # run the compiled server
+```
+
 ## File Structure
 
 ```
 hudu-mcp/
-├── stdio.js        ← MCP server (all tools defined here)
-├── package.json    ← Dependencies
-├── install.ps1     ← Windows installer for Claude Desktop
-├── uninstall.ps1   ← Windows uninstaller
-├── .env.example    ← Template for environment variables
+├── src/
+│   ├── api.ts       ← HTTP client helpers
+│   ├── tools.ts     ← MCP tool definitions
+│   └── index.ts     ← Server entry point + tool dispatch
+├── dist/            ← Compiled output (git-ignored)
+├── reference/
+│   └── HuduRESTAPI.json  ← Hudu OpenAPI spec
+├── package.json
+├── tsconfig.json
+├── .env.example
 ├── .gitignore
 └── README.md
 ```
@@ -197,7 +194,12 @@ hudu-mcp/
 
 ## Contributing
 
-To add new tools, copy an existing `case` block in the `callTool` switch and add a corresponding entry in the `TOOLS` array in `stdio.js`. The [Hudu API docs](https://developer.hudu.com) describe all available endpoints.
+To add a new tool:
+1. Add a `Tool` entry to the `TOOLS` array in `src/tools.ts`
+2. Add the corresponding `case` to the `callTool` switch in `src/index.ts`
+3. Run `npm run build` to verify it compiles
+
+The [Hudu API docs](https://developer.hudu.com) describe all available endpoints.
 
 ---
 
