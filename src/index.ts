@@ -237,7 +237,7 @@ async function callTool(name: string, args: Record<string, unknown>): Promise<un
 }
 
 const server = new Server(
-  { name: "hudu-mcp", version: "3.0.0" },
+  { name: "hudu-mcp", version: "1.1.0" },
   { capabilities: { tools: {} } }
 );
 
@@ -256,4 +256,4 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
-console.error("Hudu MCP Server v3.0.0 running on stdio");
+console.error("Hudu MCP Server v1.1.0 running on stdio");
